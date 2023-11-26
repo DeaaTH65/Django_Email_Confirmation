@@ -33,12 +33,12 @@ def activate(request, uidb64, token):
     else:
         messages.error(request, "Activation link is invalid!")
 
-    return redirect('homepage')
+    return redirect('home')
 
 
 def activateEmail(request, user, to_email):
     mail_subject = "Activate your user account."
-    message = render_to_string("template_activate_account.html", {
+    message = render_to_string("activate.html", {
         'user': user.username,
         'domain': get_current_site(request).domain,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
@@ -63,18 +63,17 @@ def register(request):
             user.save()
             activateEmail(request, user, form.cleaned_data.get('email'))
             
-            return redirect('homepage')
+            return redirect('home')
         
         else:
-            for error in list(form.errors.values()):
-                messages.error(request, error)
+            messages.error(request, "error")
                 
     else:
         form = UserRegistrationForm()
         
     return render(
         request=request,
-        template_name='users/register.html',
+        template_name='register.html',
         context={'form': form}
     )
     
@@ -83,7 +82,7 @@ def register(request):
 def custom_logout(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
-    return redirect("homepage")
+    return redirect("home")
 
 
 
@@ -98,20 +97,15 @@ def custom_login(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f"Hello <b>{user.username}</b>! You have been logged in")
-                return redirect("homepage")
+                return redirect("home")
 
-        else:
-            for key, error in list(form.errors.items()):
-                if key == 'captcha' and error[0] == 'This field is required.':
-                    messages.error(request, "You must pass the reCAPTCHA test")
-                    continue
-                
-                messages.error(request, error)
+        else:    
+            messages.error(request, "error")
 
     form = UserLoginForm()
 
     return render(
         request=request,
-        template_name="users/login.html",
+        template_name="login.html",
         context={"form": form}
         )
